@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script>
+    function showLoading() {
+      document.getElementById('loadingDiv').innerText = 'loading...';
+    }
+
+    window.onload = function() {
+      google.script.run.withSuccessHandler(populateDropdown).dropdownOptions_ScooleCode();
+      google.script.run.withSuccessHandler(populateDropdown2).dropdownOptions_ScooleName();
+    };
+
+    function populateDropdown(options) {
+      var dropdown = document.getElementById('CodeDropdown');
+      options.forEach(function(option) {
+        var opt = document.createElement('option');
+        opt.value = option;
+        opt.innerHTML = option;
+        dropdown.appendChild(opt);
+      });
+    }
+
+    function populateDropdown2(options) {
+      var dropdown = document.getElementById('NameDropdown');
+      options.forEach(function(option) {
+        var opt = document.createElement('option');
+        opt.value = option;
+        opt.innerHTML = option;
+        dropdown.appendChild(opt);
+      });
+    }
+    function searchByCode() {
+       var selectedValue = document.getElementById('CodeDropdown').value;
+       if(selectedValue){
+        showLoading();
+        google.script.run.withSuccessHandler(showSuccessMessage).getNamebyCode(selectedValue);
+     }
+     else{
+       document.getElementById('loadingDiv').innerText = "Please choose a value before clicking Submit.";
+     }
+     }
+     function searchByName() {
+      var selectedValue = document.getElementById('NameDropdown').value;
+       if (selectedValue){
+        showLoading();   
+        google.script.run.withSuccessHandler(showSuccessMessage).getCodebyName(selectedValue);
+      }
+      else{
+        document.getElementById('loadingDiv').innerText = "Please choose a value before clicking Submit.";
+      }
+     }
+      function showSuccessMessage() {  
+        document.write("<center><h1>You have successfully Submited</h1></center>");
+      }
+  </script>
+</head>
+
+<body>
+  <form id='salseForm'>
+    <br><br>
+    <label for="CodeDropdown">Search by Code : </label>
+    <select id="CodeDropdown" style="width: 240px;">
+       <option value="" disabled selected>Select a value</option>
+    </select>
+    <button type="button" onclick="searchByCode()">Submit</button>
+   
+    <br><br><br>
+
+    <label for="NameDropdown">Search by Name : </label>
+    <select id="NameDropdown" style="width: 240px;">
+      <option value="" disabled selected>Select a value</option>
+    </select>
+    <button type="button" onclick="searchByName()">Submit</button>
+    
+     <div id="loadingDiv" style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%) font-size: 20px font-family: 'Tajawal', sans-serif;"></div> 
+   
+  </form>
+</body>
+</html>
