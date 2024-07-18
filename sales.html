@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+  
+  <style>
+  body {
+    background-color: white; /* Light blue background */
+    color: #333; /* Dark text color for good contrast */
+    font-family: 'Tajawal', 'sans-serif'; /* Default font */
+  }
+
+  .form-container { /* Style the form container */
+    background-color: #fff; /* White background for the form */
+    border-radius: 5px;
+    padding: 20px;
+    margin: 0 auto; /* Center the form horizontally */
+    max-width: 600px; /* Limit form width */
+  }
+
+  h3 {
+    color: #FF0000; /* Match text color */
+  }
+
+  label {
+    font-weight: bold; /* Bold labels for better readability */
+  }
+
+  .row {
+    margin-bottom: 15px; /* Consistent spacing between rows */
+  }
+
+  .col-sm-3,
+  .col-sm-9 {
+    padding: 5px 0; /* Adjust padding for better layout */
+  }
+
+  select,
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+  }
+
+  select {
+    /* Style dropdowns */
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background-color: #337ab7; /* Blue button color */
+    color: #fff; /* White button text */
+    border-color: #2e6da4; /* Blue button border */
+  }
+</style>
+
+  <script>
+    function showLoading() {
+      document.getElementById('loadingDiv').innerText = 'loading...';
+    }
+
+    window.onload = function() {
+      google.script.run.updateSales();
+      google.script.run.withSuccessHandler(populateDropdown).dropdownOptions_ScooleCode();
+      google.script.run.withSuccessHandler(populateDropdown2).dropdownOptions_ScooleName();
+    };
+
+    function populateDropdown(options) {
+      var dropdown = document.getElementById('codeDropdown');
+      options.forEach(function(option) {
+        var opt = document.createElement('option');
+        opt.value = option;
+        opt.innerHTML = option;
+        dropdown.appendChild(opt);
+      });
+    }
+
+    function populateDropdown2(options) {
+      var dropdown = document.getElementById('nameDropdown');
+      options.forEach(function(option) {
+        var opt = document.createElement('option');
+        opt.value = option;
+        opt.innerHTML = option;
+        dropdown.appendChild(opt);
+      });
+    }
+    function searchByCode() {
+       var selectedValue = document.getElementById('codeDropdown').value;
+       if(selectedValue){
+        showLoading();
+        google.script.run.withSuccessHandler(showSuccessMessage).insertNamebyCode(selectedValue);
+     }
+     else{
+       document.getElementById('loadingDiv').innerText = "Please choose a value before clicking Submit.";
+     }
+     }
+     function searchByName() {
+       var selectedValue = document.getElementById('nameDropdown').value;
+        if (selectedValue){
+         showLoading();   
+         google.script.run.withSuccessHandler(showSuccessMessage).insertCodebyName(selectedValue);
+       }
+       else{
+         document.getElementById('loadingDiv').innerText = "Please choose a value before clicking Submit.";
+      }
+     }
+      function showSuccessMessage() {  
+        document.write("<center><h1>You have successfully Submited</h1></center>");
+      }
+
+     function searchByCodeAdd() {
+        var selectedValue = document.getElementById('codeDropdown').value;
+        if (selectedValue){
+          document.getElementById('s_Code').innerText = selectedValue;
+          fetchData_byCode();
+        }
+         else{
+            document.getElementById('loadingDiv').innerText = "Please choose a value before clicking Submit.";
+         }  
+      }
+
+     function searchByNameAdd() {
+        var selectedValue = document.getElementById('nameDropdown').value;
+          if(selectedValue){
+            document.getElementById('s_Name').innerText = selectedValue;
+            fetchData_byName();
+          }
+         else{
+            document.getElementById('loadingDiv').innerText = "Please choose a value before clicking Submit.";
+         }
+        }
+
+       function addTargetProduct(){
+
+        const selectElement = document.getElementById("productDropdown_Targeted");
+        const targetProductSpan = document.getElementById("t_product");
+
+         selectElement.addEventListener("click", function() {
+         selectElement.size = selectElement.options.length;
+         });
+
+        selectElement.addEventListener("change", function() {
+        selectElement.size = 1;
+         const selectedOptions = Array.from(selectElement.selectedOptions).map(option => option.value);
+         targetProductSpan.textContent = selectedOptions.join(", ");
+         });
+       }
+ 
+      function addClosedProduct(){
+
+        const selectElement = document.getElementById("productDropdown_Closed");
+        const targetProductSpan = document.getElementById("c_product");
+
+        selectElement.addEventListener("change", function() {
+         const selectedOptions = Array.from(selectElement.selectedOptions).map(option => option.value);
+         targetProductSpan.textContent = selectedOptions.join(", ");
+         });
+        }  
+  
+   function checkAndSearch() {    
+        var sCodeValue = document.getElementById('s_Code').innerText;
+        var sNameValue = document.getElementById('s_Name').innerText;
+        var t_productValue = document.getElementById("t_product").textContent;
+        var c_productValue = document.getElementById("c_product").textContent;
+   
+           if (sCodeValue) {
+             searchByCode();
+           } else if (sNameValue) {
+             searchByName();
+            } else {
+               console.log("No value found in either Code or Name.");
+           }
+              google.script.run.getValueFromSheet(sCodeValue, "AC", 3);
+              google.script.run.getValueFromSheet(sCodeValue, "C", 5);
+              google.script.run.addDataToSheet(t_productValue, 14);
+              google.script.run.addDataToSheet(c_productValue, 15);
+    }
+  </script>
+
+    <script>
+    function fetchData_byCode() {
+      var selectedValue = document.getElementById('codeDropdown').value;
+      google.script.run
+        .withSuccessHandler(function(data) {
+          // Handle the returned data from the server
+          document.getElementById("nameDropdown").value = data;
+        }).getNamebyCode(selectedValue); // Call the server-side function
+    }
+
+  function fetchData_byName() {
+      var selectedValue = document.getElementById('nameDropdown').value;
+      google.script.run
+        .withSuccessHandler(function(data) {
+          // Handle the returned data from the server
+          document.getElementById("codeDropdown").value = data;
+        }).getCodebyName(selectedValue); // Call the server-side function
+    }
+
+  </script>
+
+</head>
+
+<body>
+  <form id='salesForm'>
+
+    <h3> You can choose either school code or name * </h3>
+    
+    <label for="codeDropdown">School Code : </label>
+    <select id="codeDropdown" onchange="searchByCodeAdd()" >
+       <option value="" disabled selected>Select a value</option>
+    </select>
+    <span id="s_Code" style="color: white;" ></span>
+
+    <br>
+
+    <label for="nameDropdown">School Name : </label>
+    <select id="nameDropdown" onchange="searchByNameAdd()" >
+      <option value="" disabled selected>Select a value</option>
+    </select>
+     <span id="s_Name" style="color: white;" ></span>
+
+    <br>
+     <h3> You can choose more of Product * </h3>
+     <label for="productDropdown_Targeted">Targeted Products : </label>
+     <select id="productDropdown_Targeted" multiple onchange="addTargetProduct()" >
+      <option value="" disabled selected>Select a value</option>
+      <option value="Basic">Basic</option>
+      <option value="Growth">Growth</option>
+      <option value="Premium">Premium</option>
+      <option value="Enterprise">Enterprise</option>
+      <option value="Add-ons">Add-ons</option>
+      <option value="Attendance">Attendance</option>
+      <option value="Bus">Bus</option>
+      <option value="Canteen">Canteen</option>
+      <option value="Push notifications">Push notifications</option>
+     </select>
+     <span id="t_product" style="color: white;" ></span>
+
+     <br>
+     <label for="productDropdown_Closed">Closed Products : </label>
+     <select multiple id="productDropdown_Closed" onchange="addClosedProduct()" >
+      <option value="" disabled selected>Select a value</option>
+      <option value="Basic">Basic</option>
+      <option value="Growth">Growth</option>
+      <option value="Premium">Premium</option>
+      <option value="Enterprise">Enterprise</option>
+      <option value="Add-ons">Add-ons</option>
+      <option value="Attendance">Attendance</option>
+      <option value="Bus">Bus</option>
+      <option value="Canteen">Canteen</option>
+      <option value="Push notifications">Push notifications</option>
+     </select>
+     </select>
+     <span id="c_product" style="color: white;" ></span>
+
+
+    
+     <div id="loadingDiv" style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%) font-size: 20px font-family: 'Tajawal', sans-serif;"></div> 
+
+    
+  <!-- Submit Button -->
+  <div class="row mb-3">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-9 d-grid">
+      <button type="submit" onclick= "checkAndSearch()" class="btn btn-primary">Submit</button>
+    </div>
+  </div>
+
+
+  </form>
+</body>
+</html>
